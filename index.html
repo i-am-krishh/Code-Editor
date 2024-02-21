@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Code Editor</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.4/codemirror.min.css">
+
+    <style>
+         /* Navbar in light mode */
+         .navbar-light {
+            background-color: #f8f9fa; /* Light background color */
+            color: #212529; /* Dark text color */
+        }
+
+        /* Navbar in dark mode */
+        .navbar-dark {
+            background-color: #000; /* Dark background color */
+            color: #fff; /* Light text color */
+        }
+
+        #modeToggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 50px; /* Width and height for circular shape */
+            height: 50px;
+            border-radius: 50%; /* Make it circular */
+        }
+    </style>
+</head>
+<body>
+    <button id="modeToggle" class="btn btn-secondary">lm</button>
+    <div class="container-fluid">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            
+            <a class="navbar-brand" href="#">
+                <!-- <img src="logo.png" alt="Logo" height="30"> -->Code Editor
+            </a>
+
+            <!-- Navbar toggler for mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar items -->
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <!-- Language -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Language</a>
+                    </li>
+                    <!-- Previous Projects -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Previous Projects</a>
+                    </li>
+                    <!-- User Profile -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">User Profile</a>
+                    </li>
+                    <!-- Settings -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Code Editor -->
+                <textarea id="codeEditor" class="form-control" rows="40"></textarea>
+                <button id="executeButton" class="btn btn-primary">Execute</button>
+            </div>
+            <div class="col-md-4">
+                <!-- Output Area -->
+                <div id="output" class="card">
+                    <div class="card-header">
+                        Output
+                    </div>
+                    <div class="card-body">
+                        <pre id="outputText"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.4/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.59.4/mode/javascript/javascript.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script>
+        // Initialize CodeMirror
+        var codeEditor = CodeMirror.fromTextArea(document.getElementById("codeEditor"), {
+            mode: "javascript", // Set the mode (language) for syntax highlighting
+            lineNumbers: true, // Enable line numbers
+            theme: "default", // Choose a theme (optional)
+        });
+
+        // Function to execute the code on the backend
+        function executeCode(code) {
+            // Make an AJAX POST request to the backend endpoint
+            fetch('/execute-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ code: code })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the output on the frontend
+                document.getElementById('outputText').innerText = data.output;
+            })
+            .catch(error => console.error('Error executing code:', error));
+        }
+
+        // Event listener for the execute button
+        document.getElementById('executeButton').addEventListener('click', function() {
+            // Get the code from the CodeMirror editor
+            var code = codeEditor.getValue();
+
+            // Execute the code
+            executeCode(code);
+        });
+
+
+        function toggleMode() {
+            // Toggle the button text and body class
+            var modeToggle = document.getElementById('modeToggle');
+            if (document.body.classList.contains('dark-mode')) {
+                document.body.classList.remove('dark-mode');
+                document.querySelector('.navbar').classList.remove('navbar-dark');
+                document.querySelector('.navbar').classList.add('navbar-light');
+                modeToggle.textContent = 'LM'; // Light Mode abbreviation
+            } else {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.navbar').classList.remove('navbar-light');
+                document.querySelector('.navbar').classList.add('navbar-dark');
+                modeToggle.textContent = 'DM'; // Dark Mode abbreviation
+            }
+        }
+
+        // Event listener for the mode toggle button
+        document.getElementById('modeToggle').addEventListener('click', function() {
+            toggleMode();
+        });
+
+        // Function to display output
+        function displayOutput(output) {
+            var outputDisplay = document.getElementById('outputDisplay');
+            outputDisplay.textContent = output;
+            outputDisplay.style.display = 'block'; // Show the output display area
+        }
+
+        // Sample function to execute code and display output
+        function executeCode() {
+            // Replace this with actual code execution logic
+            var output = "Output of the executed code";
+            displayOutput(output);
+        }
+    </script>
+</body>
+</html>
